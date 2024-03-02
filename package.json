@@ -13,6 +13,7 @@
     "db:reset": "prisma migrate reset --skip-seed -f",
     "db:seed": "prisma migrate reset -f",
     "db:migrate": "prisma migrate dev --name",
+    "prismaliser": "node ./.dev/openPrismaPrismaliser.js",
     "test": "playwright test"
   },
   "prisma": {

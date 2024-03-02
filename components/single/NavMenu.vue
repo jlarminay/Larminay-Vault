@@ -14,6 +14,7 @@ const menuItems = ref([
   { label: 'My Videos', icon: 'sym_o_movie', to: '/videos/mine' },
   { type: 'separator' },
   { label: 'All People', icon: 'sym_o_groups', to: '/people' },
+  { label: 'Family Tree', icon: 'sym_o_groups', to: '/people/tree' },
   { type: 'separator' },
   { label: 'Legal', icon: 'sym_o_policy', to: '/legal' },
   { type: 'separator' },

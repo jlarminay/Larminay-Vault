@@ -20,6 +20,14 @@ services:
       - TZ=America/Vancouver
       - PGTZ=America/Vancouver
 
+  lv-prismaliser:
+    container_name: lv-prismaliser
+    image: ovyerus/prismaliser:latest
+    ports:
+      - 5556:3000
+    networks:
+      - lv-network
+
   lv-s3-ninja:
     container_name: lv-s3-ninja
     image: scireum/s3-ninja:8.3.2
