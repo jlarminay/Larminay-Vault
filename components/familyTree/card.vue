@@ -30,11 +30,16 @@ function click() {
     </div>
   </router-link> -->
   <NuxtLink
-    class="tw_border tw_inline-block tw_rounded tw_w-[300px]"
+    class="tw_border tw_inline-block tw_rounded tw_min-w-[170px]"
+    :class="{
+      'tw_bg-red-50': personData.gender === 'Female',
+      'tw_bg-blue-50': personData.gender === 'Male',
+      'tw_bg-purple-50': personData.gender === 'Other',
+    }"
     :to="`/people/${personData.id}`"
   >
     <div
-      class="tw_flex tw_items-center tw_gap-4 tw_p-2 hover:tw_bg-gray-100 tw_transition-colors tw_duration-300"
+      class="tw_flex tw_flex-col tw_items-center tw_gap-4 tw_p-2 hover:tw_bg-gray-100 tw_transition-colors tw_duration-300"
     >
       <div
         class="tw_w-[100px] tw_h-[100px] tw_rounded-full tw_overflow-hidden tw_border-4"
@@ -46,7 +51,7 @@ function click() {
       >
         <img :src="personData.image ? personData.image.path : null" class="tw_object-cover" />
       </div>
-      <div class="tw_flex-1">
+      <div class="tw_flex-1 tw_text-center">
         <p class="tw_text-xl">{{ personData.name }}</p>
         <p>{{ $dayjs(personData.birthday).format('MMM D, YYYY') }}</p>
         <p class="tw_text-sm tw_opacity-80">{{ personData.videos }} videos</p>
