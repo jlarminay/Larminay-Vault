@@ -1,5 +1,6 @@
 import { router } from '@/server/trpc/trpc';
 
+import { systemRouter } from './system/routes';
 import { videoRouter } from './video/routes';
 import { commentRouter } from './comment/routes';
 import { personRouter } from './person/routes';
@@ -9,6 +10,7 @@ import { userRouter } from './user/routes';
 import { collectionRouter } from './collection/routes';
 
 export const appRouter = router({
+  system: systemRouter,
   video: videoRouter,
   comment: commentRouter,
   person: personRouter,

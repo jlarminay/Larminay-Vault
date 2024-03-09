@@ -5,13 +5,42 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
 });
 
+const wrapper = ref(null);
 const familyTree = ref(null);
 const currentZoom = ref(0.5);
 const isDragging = ref(false);
 const startPosition = ref({ x: 0, y: 0 });
 const position = ref({ x: 0, y: 0 });
+
+watch(
+  () => [props.tree, wrapper.value, familyTree.value],
+  () => {
+    resetView();
+  },
+  { immediate: true },
+);
+
+function resetView() {
+  currentZoom.value = 0.5;
+  if (props.tree.length === 0 || !wrapper.value || !familyTree.value) return;
+
+  // get width and height of the family tree
+  // then center it in the wrapper
+  const wrapperWidth = wrapper.value.clientWidth;
+  const wrapperHeight = wrapper.value.clientHeight;
+  const familyTreeWidth = familyTree.value.clientWidth;
+  const familyTreeHeight = familyTree.value.clientHeight;
+  position.value = {
+    x: (wrapperWidth - familyTreeWidth) / 2,
+    y: (wrapperHeight - familyTreeHeight) / 2,
+  };
+}
 
 function handleScroll(event: any) {
   if (event.deltaY > 0) {
@@ -21,7 +50,6 @@ function handleScroll(event: any) {
   }
   currentZoom.value = Math.round(Math.min(1.5, Math.max(0.1, currentZoom.value)) * 100) / 100;
 }
-
 function startDrag(event) {
   isDragging.value = true;
   startPosition.value = {
@@ -58,14 +86,15 @@ function stopDrag() {
 
     <!-- Display -->
     <div
+      v-if="tree.length > 0"
       ref="wrapper"
       id="family-tree"
-      class="tw_relative tw_overflow-scroll tw_w-full tw_h-full"
+      class="tw_relative tw_overflow-hidden tw_w-full tw_h-full"
       @wheel.prevent="handleScroll"
     >
       <div
         ref="familyTree"
-        class="tw_absolute tw_border-2 tw_border-red-600 tw_cursor-grab active:tw_cursor-grabbing tw_bg-white tw_rounded"
+        class="tw_absolute tw_cursor-grab active:tw_cursor-grabbing tw_bg-white tw_rounded tw_p-96"
         :style="{
           top: position.y + 'px',
           left: position.x + 'px',
@@ -79,6 +108,14 @@ function stopDrag() {
           </template>
         </FamilyTreeBranch>
       </div>
+    </div>
+
+    <div
+      v-if="tree.length === 0"
+      class="tw_w-full tw_h-full tw_flex tw_justify-center tw_items-center tw_text-lg"
+    >
+      <span v-if="loading">Loading Family Tree</span>
+      <span v-else>Error Displaying Family Tree</span>
     </div>
   </div>
 </template>

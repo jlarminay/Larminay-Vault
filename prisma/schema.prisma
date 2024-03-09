@@ -122,3 +122,11 @@ model Collection {
   updatedAt   DateTime @updatedAt
   videos      Video[]  @relation(name: "VideoToCollection")
 }
+
+model System {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -36,7 +36,7 @@ function click() {
       'tw_bg-blue-50': personData.gender === 'Male',
       'tw_bg-purple-50': personData.gender === 'Other',
     }"
-    :to="`/people/${personData.id}`"
+    :to="personData.id ? `/people/${personData.id}` : null"
   >
     <div
       class="tw_flex tw_flex-col tw_items-center tw_gap-4 tw_p-2 hover:tw_bg-gray-100 tw_transition-colors tw_duration-300"
@@ -53,8 +53,13 @@ function click() {
       </div>
       <div class="tw_flex-1 tw_text-center">
         <p class="tw_text-xl">{{ personData.name }}</p>
-        <p>{{ $dayjs(personData.birthday).format('MMM D, YYYY') }}</p>
-        <p class="tw_text-sm tw_opacity-80">{{ personData.videos }} videos</p>
+        <p>Born: {{ $dayjs(personData.birthday).format('MMM D, YYYY') }}</p>
+        <p v-if="personData.deathday">
+          Died: {{ $dayjs(personData.deathday).format('MMM D, YYYY') }}
+        </p>
+        <p v-if="personData.videos !== null" class="tw_text-sm tw_opacity-80">
+          {{ personData.videos }} videos
+        </p>
       </div>
     </div>
   </NuxtLink>

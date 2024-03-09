@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
+import system from './system.js';
 import user from './user.js';
 import person from './person.js';
 import file from './file.js';
@@ -12,6 +13,7 @@ import report from './report.js';
 const prisma = new PrismaClient();
 
 async function main() {
+  await system();
   await user();
   await file();
   await person();
