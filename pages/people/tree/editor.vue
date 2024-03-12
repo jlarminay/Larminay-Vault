@@ -1,36 +1,59 @@
 <script setup lang="ts">
-import { format } from 'json-string-formatter';
+import type { Elements } from '@vue-flow/core';
+import { VueFlow, useVueFlow, Handle, Position } from '@vue-flow/core';
+import { ControlButton, Controls } from '@vue-flow/controls';
+import { MiniMap } from '@vue-flow/minimap';
 
 definePageMeta({
   middleware: 'authorized-only',
 });
 
-const router = useRouter();
-const systemStore = useSystemStore();
-const personStore = usePersonStore();
-const systemData = ref(await systemStore.getAll());
-const allPersons = ref(await personStore.getAll());
-const loading = ref(false);
-const code = ref({
-  text: '',
-});
+updateTreeLayout();
 
-onMounted(() => {
-  code.value.text = format(JSON.parse(systemData.value.familyTree));
-});
+const { nodes, edges, updateEdge, addEdges, toObject, fromObject } = useVueFlow();
+const elements = ref<Elements>([
+  // // nodes
+  // // an input node, specified by using `type: 'input'`
+  // { id: '1', type: 'special', position: { x: 250, y: 5 }, data: { type: 'person' } },
+  // // default node, you can omit `type: 'default'` as it's the fallback type
+  // { id: '2', type: 'special', position: { x: 100, y: 100 }, data: { type: 'person' } },
+  // // An output node, specified by using `type: 'output'`
+  // { id: '3', type: 'special', position: { x: 400, y: 200 }, data: { type: 'connection' } },
+  // {
+  //   id: '4',
+  //   type: 'special',
+  //   position: { x: 400, y: 200 },
+  //   data: {
+  //     // custom data goes here
+  //     type: 'person',
+  //     hello: 'world',
+  //   },
+  // },
+  // // edges
+  // { id: 'e1-3', source: '1', target: '3', type: 'smoothstep' },
+  // { id: 'e1-2', source: '1', target: '2', type: 'smoothstep' },
+  // { id: 'e1-4', source: '1', target: '4', type: 'smoothstep' },
+]);
+const saved = ref<any>([]);
 
-async function saveFamilyTree() {
-  loading.value = true;
-  let newValue = JSON.stringify(code.value.text).replace(/\\n/g, '').replace(/\\t/g, '');
-  const response = await systemStore.update('familyTree', newValue);
-  loading.value = false;
-
-  if (!response) {
-    toaster({ type: 'error', message: 'Something went wrong.<br/>Please try again later.' });
-    return;
-  }
-  toaster({ type: 'success', message: 'Successfully updated family tree.' });
-  router.push('/people/tree');
+function addNewNode(type) {
+  // random num between 0 and 100000
+  const id = Math.floor(Math.random() * 100000);
+  elements.value.push({
+    id: id,
+    type: 'special',
+    position: { x: 0, y: 0 },
+    data: {
+      type: type,
+      id: id,
+    },
+  });
+}
+function removeNode(id: string) {
+  // in elements remove all nodes that have id, there may be multiple
+  elements.value = elements.value.filter((el) => {
+    return el.id !== id && el.source !== id && el.target !== id;
+  });
 }
 </script>
 
@@ -47,52 +70,66 @@ async function saveFamilyTree() {
         <h1 class="h1">Family Tree Editor</h1>
       </div>
 
-      <div class="tw_mt-6 tw_max-w-[800px] tw_mx-auto tw_flex tw_gap-2">
-        <q-form class="tw_grow" @submit.prevent="saveFamilyTree">
-          <q-input v-model="code.text" type="textarea" outlined dense rows="30" />
+      <div class="tw_mt-6 tw_max-w-[800px] tw_h-[600px] tw_mx-auto">
+        <q-btn @click="addNewNode('person')" label="Add new person" />
+        <q-btn @click="addNewNode('connection')" label="Add new connection" />
+        <q-btn @click="saved = JSON.stringify(toObject())" label="Save" />
+        <q-btn @click="fromObject(JSON.parse(saved))" label="Restore" />
 
-          <div class="tw_flex tw_justify-end tw_items-center tw_gap-2 tw_mt-2">
-            <q-btn
-              no-caps
-              unelevated
-              rounded
-              outline
-              color="primary"
-              label="Cancel"
-              to="/people/tree"
-            />
-            <q-btn
-              no-caps
-              unelevated
-              rounded
-              :loading="loading"
-              color="primary"
-              label="Save"
-              @click="saveFamilyTree"
-            />
-          </div>
-        </q-form>
+        <VueFlow
+          v-model="elements"
+          fit-view-on-init
+          class="tw_border tw_rounded"
+          @connect="
+            console.log($event);
+            addEdges([{ ...$event, type: 'smoothstep' }]);
+          "
+        >
+          <Controls position="top-right" :showInteractive="true" />
+          <MiniMap />
 
-        <div class="tw_w-[300px] tw_flex tw_flex-col tw_gap-2">
-          <div class="tw_border tw_rounded tw_p-2">
-            <b>Example of Custom Person</b>
-            <pre>
-"name": "John",
-"birthday": "1990-01-01",
-"deathday": "2021-01-01",
-"videos": null,
-"gender": null, // Male, Female, Other, null
-"image": {
-  // path must be a public url or null
-  "path": "https://via.placeholder.com/150"
-}</pre
+          <!-- bind your custom node type to a component by using slots, slot names are always `node-<type>` -->
+          <template #node-special="specialNodeProps">
+            <!-- Person Node -->
+            <div
+              v-if="specialNodeProps.data.type === 'person'"
+              class="tw_border tw_rounded tw_px-4 tw_py-2"
             >
-          </div>
-          <div>SEARCH FOR PEOPLE</div>
+              <Handle type="target" :position="Position.Left" />
+              <Handle type="target" :position="Position.Right" />
+              <Handle type="target" :position="Position.Bottom" />
+              <Handle type="target" :position="Position.Up" />
+
+              <div>
+                special NODE
+                <q-btn @click="removeNode(specialNodeProps.id)" label="Remove" />
+                <pre>{{ specialNodeProps.data }}</pre>
+              </div>
+            </div>
+
+            <!-- Connection Node -->
+            <div
+              v-if="specialNodeProps.data.type === 'connection'"
+              class="tw_border tw_rounded-full tw_p-4"
+            >
+              <Handle type="target" :position="Position.Left" />
+              <Handle type="target" :position="Position.Right" />
+              <Handle type="target" :position="Position.Bottom" />
+            </div>
+          </template>
+        </VueFlow>
+
+        <div class="tw_text-xs">
+          <pre>{{ saved }}</pre>
         </div>
       </div>
     </main>
   </div>
 </template>
 
-<style scoped lang="postcss"></style>
+<style>
+@import '@vue-flow/core/dist/style.css';
+@import '@vue-flow/core/dist/theme-default.css';
+@import '@vue-flow/minimap/dist/style.css';
+@import '@vue-flow/controls/dist/style.css';
+</style>
