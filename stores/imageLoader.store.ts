@@ -3,15 +3,17 @@ import { defineStore } from 'pinia';
 
 interface ImageLoaderState {
   loadingQueue: HTMLImageElement[];
+  loadingCount: number;
+  maxConcurrentLoads: number;
   observer: IntersectionObserver | null;
-  isLoading: boolean;
 }
 
 export const useImageLoaderStore = defineStore('imageLoader', {
   state: (): ImageLoaderState => ({
     loadingQueue: [],
+    loadingCount: 0,
+    maxConcurrentLoads: 5,
     observer: null,
-    isLoading: false,
   }),
   actions: {
     initObserver() {
@@ -41,29 +43,24 @@ export const useImageLoaderStore = defineStore('imageLoader', {
         this.loadingQueue.push(image);
       }
     },
-    async processQueue() {
-      if (this.loadingQueue.length > 0 && !this.isLoading) {
-        const imagesToLoad = this.loadingQueue.splice(0, 1);
-        this.isLoading = true;
-        for (const image of imagesToLoad) {
-          await this.loadImage(image);
-        }
-        this.isLoading = false;
-        this.processQueue(); // Continue processing the queue
+    processQueue() {
+      while (this.loadingQueue.length > 0 && this.loadingCount < this.maxConcurrentLoads) {
+        const image = this.loadingQueue.shift()!;
+        this.loadImage(image);
       }
     },
-    async loadImage(image: HTMLImageElement) {
+    loadImage(image: HTMLImageElement) {
       const src = image.dataset.src;
       if (src) {
+        this.loadingCount++;
         const img = new Image();
         img.src = src;
-        await new Promise((resolve) => {
-          img.onload = () => {
-            image.src = src;
-            resolve(true);
-          };
-        });
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        img.onload = async () => {
+          await new Promise((resolve) => setTimeout(resolve, 50)); // add a delay to show the image
+          image.src = src;
+          this.loadingCount--;
+          this.processQueue(); // Process the next set of images after loading one
+        };
       }
     },
   },

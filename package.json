@@ -1,6 +1,6 @@
 {
-  "name": "nuxt-app",
-  "version": "0.0.0",
+  "name": "larminay-vault",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "start": "npm i && node start.js --dev",
@@ -58,6 +58,7 @@
     "@types/node": "^20.10.8",
     "@types/shelljs": "^0.8.15",
     "@types/validator": "^13.11.10",
+    "@vite-pwa/nuxt": "^0.9.1",
     "concurrently": "^8.2.2",
     "dayjs-nuxt": "^2.1.9",
     "next-auth": "4.22.5",

@@ -1,4 +1,3 @@
-import { sign } from 'node:crypto';
 import { resolve } from 'node:path';
 
 export default defineNuxtConfig({
@@ -11,6 +10,7 @@ export default defineNuxtConfig({
     'nuxt-quasar-ui',
     'dayjs-nuxt',
     '@sidebase/nuxt-auth',
+    '@vite-pwa/nuxt',
   ],
   css: [
     '@/assets/css/tailwind.css',
@@ -66,6 +66,58 @@ export default defineNuxtConfig({
     origin: process.env.AUTH_ORIGIN,
     provider: {
       type: 'authjs',
+    },
+  },
+
+  pwa: {
+    icon: {
+      source: 'public/logo/logo.png',
+      sizes: [64, 120, 144, 152, 192, 384, 512], // Optional, specify sizes if needed
+    },
+    manifest: {
+      name: 'Larminay Vault',
+      short_name: 'Vault', // Optional, shorter name for homescreen
+      lang: 'en',
+      display: 'standalone',
+      background_color: '#ffffff', // Optional, background color of splash screen
+      theme_color: '#4DBA87', // Optional, theme color of the app
+      icons: [
+        {
+          src: '/logo/logo-192x192.png',
+          sizes: '192x192',
+          type: 'image/png',
+        },
+        {
+          src: '/logo/logo-512x512.png',
+          sizes: '512x512',
+          type: 'image/png',
+        },
+      ],
+    },
+    workbox: {
+      // Optional, configuration for Workbox
+      offline: true, // Enable offline support
+      cacheAssets: true, // Cache assets for offline use
+      runtimeCaching: [
+        {
+          urlPattern: 'https://fonts.googleapis.com/.*',
+          handler: 'CacheFirst',
+          method: 'GET',
+          options: {
+            cacheName: 'google-fonts-stylesheets',
+            expiration: {
+              maxEntries: 20,
+              maxAgeSeconds: 60 * 60 * 24 * 365,
+            },
+          },
+        },
+      ],
+    },
+    meta: {
+      // Optional, meta tags configuration
+      mobileApp: true,
+      appleStatusBarStyle: 'black-translucent',
+      author: 'Josh Larminay',
     },
   },
 
