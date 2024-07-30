@@ -80,7 +80,7 @@ export default defineNuxtConfig({
       lang: 'en',
       display: 'standalone',
       background_color: '#ffffff', // Optional, background color of splash screen
-      theme_color: '#4DBA87', // Optional, theme color of the app
+      theme_color: '#833deb', // Optional, theme color of the app
       icons: [
         {
           src: '/logo/logo-192x192.png',
@@ -94,29 +94,9 @@ export default defineNuxtConfig({
         },
       ],
     },
-    workbox: {
-      // Optional, configuration for Workbox
-      offline: true, // Enable offline support
-      cacheAssets: true, // Cache assets for offline use
-      runtimeCaching: [
-        {
-          urlPattern: 'https://fonts.googleapis.com/.*',
-          handler: 'CacheFirst',
-          method: 'GET',
-          options: {
-            cacheName: 'google-fonts-stylesheets',
-            expiration: {
-              maxEntries: 20,
-              maxAgeSeconds: 60 * 60 * 24 * 365,
-            },
-          },
-        },
-      ],
-    },
     meta: {
-      // Optional, meta tags configuration
       mobileApp: true,
-      appleStatusBarStyle: 'black-translucent',
+      appleStatusBarStyle: 'white-translucent',
       author: 'Josh Larminay',
     },
   },
